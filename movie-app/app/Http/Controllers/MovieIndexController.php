@@ -9,11 +9,8 @@ use Inertia\Response;
 
 final class MovieIndexController
 {
-
     public function __invoke(): Response
     {
         return Inertia::render('movies/index');
     }
-
-
 }
