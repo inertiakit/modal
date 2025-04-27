@@ -14,6 +14,8 @@ use Inertia\Response as InertiaResponse;
 use Inertia\Support\Header;
 use Symfony\Component\HttpFoundation\InputBag;
 
+use function app;
+
 class Modal implements Responsable
 {
     protected Router $router;
@@ -28,7 +30,9 @@ class Modal implements Responsable
         protected array|Arrayable $props
     ) {
 
-        $this->router = app(Router::class);
+        /** @var Router $router */
+        $router = app('router');
+        $this->router = $router;
 
     }
 
