@@ -2,6 +2,7 @@
 
 namespace Inertiakit\Modal;
 
+use Illuminate\Contracts\Routing\Registrar;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\JsonResponse;
@@ -9,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Response;
+use Inertia\Response as InertiaResponse;
 use Inertia\Support\Header;
+use Symfony\Component\HttpFoundation\InputBag;
 
 class Modal implements Responsable
 {
@@ -17,6 +20,9 @@ class Modal implements Responsable
 
     protected string $baseUrl;
 
+    /**
+     * @param  array<string, mixed>|Arrayable<string, mixed>  $props
+     */
     public function __construct(
         protected string $component,
         protected array|Arrayable $props
@@ -33,15 +39,7 @@ class Modal implements Responsable
         return $this;
     }
 
-    public function render(): mixed
-    {
-        inertia()->share('modal', $this->props);
-
-        return response()->json();
-
-    }
-
-    public function handleRoute(Request $request)
+    public function handleRoute(Request $request): mixed
     {
 
         $fakeRequest = Request::create(
@@ -57,27 +55,36 @@ class Modal implements Responsable
         $baseRoute = $this->router->getRoutes()->match($fakeRequest);
 
         $fakeRequest->headers->replace($request->headers->all());
-        $fakeRequest->setJson($request->json())
+
+        $json = $request->json();
+
+        assert($json instanceof InputBag);
+
+        $fakeRequest->setJson($json)
             ->setUserResolver(fn () => $request->getUserResolver())
             ->setRouteResolver(fn () => $baseRoute)
             ->setLaravelSession($request->session());
 
         app()->instance('request', $fakeRequest);
 
-        $middleware = new SubstituteBindings(app('router'));
+        /** @var Registrar $router */
+        $router = app('router');
+
+        $middleware = new SubstituteBindings($router);
 
         return $middleware->handle($fakeRequest, fn () => $baseRoute->run());
 
     }
 
     /**
-     * {@inheritDoc}
+     * @param  Request  $request
      */
-    public function toResponse($request): \Illuminate\Http\Response|JsonResponse|\Inertia\Response
+    public function toResponse($request): \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response|JsonResponse|InertiaResponse
     {
 
-        $component = $this->component($request);
+        $component = $this->component();
 
+        /** @phpstan-ignore-next-line  */
         inertia()->share([
             'modal' => $component,
         ]);
@@ -87,6 +94,7 @@ class Modal implements Responsable
             return inertia()->render(request()->header('X-Inertia-Partial-Component'));
         }
 
+        /** @var Request $originalRequest */
         $originalRequest = app('request');
 
         $response = $this->handleRoute($originalRequest);
@@ -102,7 +110,10 @@ class Modal implements Responsable
         return Response::view('app');
     }
 
-    protected function component($request): array
+    /**
+     * @return array<string, mixed>
+     */
+    protected function component(): array
     {
         return [
             'component' => $this->component,
@@ -115,7 +126,10 @@ class Modal implements Responsable
         ];
     }
 
-    protected function redirectUrl(): string
+    /**
+     * @return array<string,string>|string
+     */
+    protected function redirectUrl(): array|string
     {
         if (request()->header('X-Inertia-Modal-Redirect')) {
             return request()->header('X-Inertia-Modal-Redirect');
