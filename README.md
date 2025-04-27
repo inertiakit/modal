@@ -9,11 +9,11 @@
 </p> -->
 
 ------
-This package provides a wonderful **PHP Skeleton** to start building your next package idea.
+This package provides a wonderful **Backed Modal** to be used on your Intertia powered Laravel applications.
 
 > **Requires [PHP 8.3+](https://php.net/releases/)**
 
-⚡️ Create your package using [Composer](https://getcomposer.org):
+⚡️ Install:
 
 ```bash
 composer require intertiakit/modal
