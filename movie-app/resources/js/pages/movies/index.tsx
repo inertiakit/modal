@@ -1,25 +1,28 @@
 import {Link, router} from "@inertiajs/react";
 import {Button} from "@/components/ui/button";
-import AppLayout from "@/layouts/app-layout";
-import Modal from "@/components/modal";
+import {Modal} from "@inertiakit/modal-react";
+import React from "react";
 
 export default function MoviesIndex() {
+    const [isOpen, setIsOpen] = React.useState(false);
 
     const handleModalOpen = () => {
 
-        router.visit('movies/some-movie-id', {
+        setIsOpen(!isOpen);
+
+        /*router.visit('movies/some-movie-id', {
             preserveScroll: true,
             preserveState: true,
             preserveUrl: false,
             replace: false
-        })
+        })*/
 
     }
 
     return (
         <div>
             <Button onClick={handleModalOpen}>Open Modal</Button>
-            <Modal />
+            <Modal isOpen={isOpen} />
         </div>
     )
 

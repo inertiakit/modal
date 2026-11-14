@@ -20,9 +20,10 @@ export default defineConfig({
     resolve: {
         alias: {
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
+            '@inertiakit/modal-react': '/../react'
         },
     },
     server: {
         host: 'movie-app.test'
-    }
+    },
 });

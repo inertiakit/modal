@@ -109,8 +109,9 @@
         "skipLibCheck": true /* Skip type checking all .d.ts files. */,
         "baseUrl": ".",
         "paths": {
+            "@inertiakit/modal-react": ["../react"],
             "@/*": ["./resources/js/*"],
-            "ziggy-js": ["./vendor/tightenco/ziggy"]
+            "ziggy-js": ["./vendor/tightenco/ziggy"],
         },
         "jsx": "react-jsx"
     },
